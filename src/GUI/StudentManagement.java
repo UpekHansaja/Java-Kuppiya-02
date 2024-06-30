@@ -437,6 +437,8 @@ public class StudentManagement extends javax.swing.JFrame {
             jButton1.setEnabled(true);
             jTable1.setEnabled(true);
             jTextField3.setEditable(true);
+            
+            loadTable();
 
         } catch (Exception e) {
             e.printStackTrace();
