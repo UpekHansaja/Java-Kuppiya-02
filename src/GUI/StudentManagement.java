@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -83,12 +84,12 @@ public class StudentManagement extends javax.swing.JFrame {
         try {
 
             ResultSet stRs = MySQL.execute("SELECT * FROM `student` INNER JOIN `grade` ON `student`.`grade_grade_id`=`grade`.`grade_id` INNER JOIN `medium` ON `student`.`medium_mid`=`medium`.`mid`;");
-            
+
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
-            
-            while (stRs.next()) {                
-                
+
+            while (stRs.next()) {
+
                 Vector<String> vector = new Vector<>();
                 vector.add(stRs.getString("fname"));
                 vector.add(stRs.getString("lname"));
@@ -97,15 +98,17 @@ public class StudentManagement extends javax.swing.JFrame {
                 vector.add(stRs.getString("school"));
                 vector.add(stRs.getString("grade"));
                 vector.add(stRs.getString("medium"));
-                
+
                 model.addRow(vector);
                 jTable1.setModel(model);
             }
-            
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        jButton2.setEnabled(false);
+        jButton3.setEnabled(false);
 
     }
 
@@ -118,6 +121,7 @@ public class StudentManagement extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -169,6 +173,11 @@ public class StudentManagement extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         jLabel2.setText("First Name");
@@ -191,13 +200,25 @@ public class StudentManagement extends javax.swing.JFrame {
 
         jLabel9.setText("Gender");
 
+        buttonGroup1.add(jRadioButton1);
         jRadioButton1.setText("Male");
 
+        buttonGroup1.add(jRadioButton2);
         jRadioButton2.setText("Female");
 
         jButton1.setText("Add Student");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Update Student");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jLabel10.setText("Search :");
 
@@ -324,6 +345,156 @@ public class StudentManagement extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+
+        if (evt.getClickCount() == 2) {
+            jButton2.setEnabled(true);
+            jButton3.setEnabled(true);
+            jButton1.setEnabled(false);
+            jTable1.setEnabled(false);
+            jTextField3.setEditable(false);
+
+            int selectedRow = jTable1.getSelectedRow();
+
+            String fname = String.valueOf(jTable1.getValueAt(selectedRow, 0));
+            String lname = String.valueOf(jTable1.getValueAt(selectedRow, 1));
+            String email = String.valueOf(jTable1.getValueAt(selectedRow, 2));
+            String mobile = String.valueOf(jTable1.getValueAt(selectedRow, 3));
+            String school = String.valueOf(jTable1.getValueAt(selectedRow, 4));
+            String grade = String.valueOf(jTable1.getValueAt(selectedRow, 5));
+            String medium = String.valueOf(jTable1.getValueAt(selectedRow, 6));
+
+            jTextField1.setText(fname);
+            jTextField2.setText(lname);
+            jTextField3.setText(email);
+            jTextField4.setText(mobile);
+            jTextField5.setText(school);
+            jComboBox1.setSelectedItem(grade);
+            jComboBox2.setSelectedItem(medium);
+
+            try {
+
+                ResultSet genderRs = MySQL.execute("SELECT * FROM `student` WHERE `email`='" + email + "'; ;");
+
+                if (genderRs.next()) {
+
+                    if (genderRs.getString("gender_gid").equals("1")) {
+                        jRadioButton1.setSelected(true);
+//                        System.out.println(genderRs.getString("gender_gid"));
+                    } else {
+                        jRadioButton2.setSelected(true);
+//                        System.out.println(genderRs.getString("gender_gid"));
+                    }
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+//            System.out.println(email);
+        }
+
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
+        String fname = jTextField1.getText();
+        String lname = jTextField2.getText();
+        String email = jTextField3.getText();
+        String mobile = jTextField4.getText();
+        String school = jTextField5.getText();
+
+        String grade = String.valueOf(jComboBox1.getSelectedItem());
+        String medium = String.valueOf(jComboBox2.getSelectedItem());
+
+        String gender;
+
+        if (jRadioButton1.isSelected()) {
+            gender = "1";
+        } else if (jRadioButton2.isSelected()) {
+            gender = "2";
+        } else {
+            gender = null;
+        }
+
+        try {
+
+            MySQL.execute("UPDATE `student` SET `fname`='" + fname + "', `lname`='" + lname + "', `mobile`='" + mobile + "', `school`='" + school + "', `gender_gid`='" + gender + "' , `grade_grade_id`='" + gradeMap.get(grade) + "',`medium_mid`='" + mediumMap.get(medium) + "' WHERE `email`='" + email + "' ");
+
+            jTextField1.setText("");
+            jTextField2.setText("");
+            jTextField3.setText("");
+            jTextField4.setText("");
+            jTextField5.setText("");
+            jComboBox1.setSelectedIndex(0);
+            jComboBox2.setSelectedIndex(0);
+            jRadioButton1.setSelected(false);
+            jRadioButton2.setSelected(false);
+
+            jButton2.setEnabled(false);
+            jButton3.setEnabled(false);
+            jButton1.setEnabled(true);
+            jTable1.setEnabled(true);
+            jTextField3.setEditable(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+        String fname = jTextField1.getText();
+        String lname = jTextField2.getText();
+        String email = jTextField3.getText();
+        String mobile = jTextField4.getText();
+        String school = jTextField5.getText();
+
+        String grade = String.valueOf(jComboBox1.getSelectedItem());
+        String medium = String.valueOf(jComboBox2.getSelectedItem());
+
+        String gender;
+
+        if (jRadioButton1.isSelected()) {
+            gender = "1";
+        } else if (jRadioButton2.isSelected()) {
+            gender = "2";
+        } else {
+            gender = null;
+        }
+
+//        Vlidations goes here
+        try {
+
+            MySQL.execute("INSERT INTO `student`(`fname`,`lname`,`email`,`password`,`gender_gid`,`mobile`,`school`,`grade_grade_id`,`medium_mid`,`status_status_id`)"
+                    + " VALUES('" + fname + "','" + lname + "','" + email + "','password','" + gender + "','" + mobile + "','" + school + "','" + gradeMap.get(grade) + "','" + mediumMap.get(medium) + "','1') ;");
+            
+            jTextField1.setText("");
+            jTextField2.setText("");
+            jTextField3.setText("");
+            jTextField4.setText("");
+            jTextField5.setText("");
+            jComboBox1.setSelectedIndex(0);
+            jComboBox2.setSelectedIndex(0);
+            jRadioButton1.setSelected(false);
+            jRadioButton2.setSelected(false);
+
+            jButton2.setEnabled(false);
+            jButton3.setEnabled(false);
+            jButton1.setEnabled(true);
+            jTable1.setEnabled(true);
+            jTextField3.setEditable(true);
+            
+            loadTable();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -340,6 +511,7 @@ public class StudentManagement extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
